@@ -142,3 +142,51 @@ sort xs = let m = minElem xs in m : sort (removeFst' m xs)
 
 srtString' :: [String] -> [String]
 srtString' = sort
+
+
+-- Exercise 1.17
+-- We'll use prefix in our substring definition
+prefix :: Eq a => [a] -> [a] -> Bool
+prefix [] _          = True
+prefix _ []          = False
+prefix (x:xs) (y:ys) = (x == y) && prefix xs ys
+
+sublist :: Eq a => [a] -> [a] -> Bool
+sublist xs ys@(_:ys') = prefix xs ys || sublist xs ys'
+sublist xs ys         = prefix xs ys
+
+substring :: String -> String -> Bool
+substring = sublist
+
+substring' xs [] = prefix xs []
+substring' xs ys | prefix xs ys            = True
+                 | substring' xs (tail ys) = True
+                 | otherwise               = False
+
+
+
+-- Exercise 1.18
+e1_18_1 = [""] :: [String]
+e1_18_2 = (True, "") :: (Bool, String)
+e1_18_3 = [e1_18_2] :: [(Bool, String)]
+e1_18_4 = ([True], "") :: ([Bool], String)
+e1_18_5 = not :: Bool -> Bool
+
+
+
+-- Exercise 1.19
+e_19_1 = head      :: [a] -> a
+-- head is the first elem of a list, error on empty
+e_19_2 = last      :: [a] -> a
+-- last is the last elem of the list, error on empty
+e_19_3 = init      :: [a] -> [a]
+-- init is everything but the last elem of the list, error on empty
+e_19_4 = fst       :: (a, b) -> a
+-- fst is the first element of a 2-tuple
+e_19_5 = (++)      :: [a] -> [a] -> [a]
+-- (++) concatenates its two argument lists together
+e_19_6 = flip      :: (a -> b -> c) -> b -> a -> c
+-- flip reverses the order of the first two arguments of a function
+e_19_7 = flip (++) :: [a] -> [a] -> [a]
+-- Thus, flip (++) concatenates it's arguments, but by appending the first one
+-- to the second one.
