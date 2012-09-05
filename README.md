@@ -1,4 +1,4 @@
-haskell_road
+The Haskell Road to Logic, Maths, and Programming
 ============
 
-My solutions to "The Haskell Road to Logic, Maths, and Programming".
+My solutions to the book exercises.
