@@ -4,16 +4,7 @@ module Prime
 
 where
 
-divides :: Integral a => a -> a -> Bool
-divides d n = rem n d == 0
-
-ld :: Integral a => a -> a
-ld = ldf 2
-
-ldf :: Integral a => a -> a -> a
-ldf k n | divides k n = k
-        | k^2 > n     = n
-        | otherwise   = ldf (k+1) n
+import GS
 
 -- Exercise 1.4
 -- If we change k^2 > n to k^2 >= n, we do not affect the outcome of the
@@ -22,11 +13,11 @@ ldf k n | divides k n = k
 
 
 -- Exercise 1.5
-prime0 :: Integral a => a -> Bool
-prime0 n | n < 1     = error "Not a positive integer."
-         | n == 1    = False
-         | otherwise = ld n == n
-
+-- prime0 Already exists in GS.hs...
+prime0' :: Integer -> Bool
+prime0' n | n < 1     = error "Not a positive integer."
+          | n == 1    = False
+          | otherwise = ld n == n
 
 -- Exercise 1.6
 -- rem takes an argument of type Integer and returns a function which takes
@@ -84,7 +75,7 @@ removeFst' m (x:xs) | m == x = xs
 -- everywhere...
 count :: Integral a => Char -> String -> a
 count _ "" = 0
-count x (c:s) | x == c    = 1 + count x s
+count x (c:s) | x == c    = succ $ count x s
               | otherwise = count x s
 
 
@@ -143,23 +134,36 @@ sort xs = let m = minElem xs in m : sort (removeFst' m xs)
 srtString' :: [String] -> [String]
 srtString' = sort
 
+-- Mergesort is a more suitable algorithm
+msort p l@(_:_:_) = merge (msort p left) (msort p right)
+    where
+      (left, right) = split l l
+      split (x:xs) (_:_:zs) = let (vs,us) = split xs zs in (x:vs, us)
+      split xs     _        = ([],xs)
+      merge [] r = r
+      merge l [] = l
+      merge (l:ls) (r:rs) | p l r     = l : merge ls (r:rs)
+                          | otherwise = r : merge (l:ls) rs
+msort _ l = l
+
+
 
 -- Exercise 1.17
--- We'll use prefix in our substring definition
-prefix :: Eq a => [a] -> [a] -> Bool
-prefix [] _          = True
-prefix _ []          = False
-prefix (x:xs) (y:ys) = (x == y) && prefix xs ys
+-- We'll use a generalized prefix in our substring definition
+prefix' :: Eq a => [a] -> [a] -> Bool
+prefix' [] _          = True
+prefix' _ []          = False
+prefix' (x:xs) (y:ys) = (x == y) && prefix' xs ys
 
 sublist :: Eq a => [a] -> [a] -> Bool
-sublist xs ys@(_:ys') = prefix xs ys || sublist xs ys'
-sublist xs ys         = prefix xs ys
+sublist xs ys@(_:ys') = prefix' xs ys || sublist xs ys'
+sublist xs ys         = prefix' xs ys
 
 substring :: String -> String -> Bool
 substring = sublist
 
-substring' xs [] = prefix xs []
-substring' xs ys | prefix xs ys            = True
+substring' xs [] = prefix' xs []
+substring' xs ys | prefix' xs ys            = True
                  | substring' xs (tail ys) = True
                  | otherwise               = False
 
@@ -190,3 +194,16 @@ e_19_6 = flip      :: (a -> b -> c) -> b -> a -> c
 e_19_7 = flip (++) :: [a] -> [a] -> [a]
 -- Thus, flip (++) concatenates it's arguments, but by appending the first one
 -- to the second one.
+
+
+
+-- Exercise 1.20
+lengths :: [[a]] -> [Int]
+lengths = map length
+
+-- Exercise 1.21
+sumLengths = sum . lengths
+
+
+
+
