@@ -1,8 +1,6 @@
 
 
-module Prime
-
-where
+module Sol1 where
 
 import GS
 
@@ -205,5 +203,20 @@ lengths = map length
 sumLengths = sum . lengths
 
 
+-- Exercise 1.24
+-- If we modify the definition from
+
+-- ldp n = ldpf primes1 n
+
+-- to
+
+-- ldp = ldfp primes1
+-- 
+-- We do not change the semantics at all. In the first case, we explicitly
+-- state the argument 'n' and then apply "ldpf primes1" to it. In the
+-- second case, we simply return the function "ldpf primes1", which
+-- presumably is going to be applied to 'n' in the calling context anyway.
+-- This is called "pointfree" style.
+-- http://www.haskell.org/haskellwiki/Pointfree
 
 
