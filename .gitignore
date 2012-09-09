@@ -4,3 +4,4 @@ cabal-dev
 *.hi
 *.chi
 *.chs.h
+*Haskell_Road_to_Logic_Math_and_Programming.pdf

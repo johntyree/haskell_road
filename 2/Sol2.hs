@@ -141,4 +141,82 @@ e_213_5  = logEquiv1 (\p -> p || (not p)) (const True)
 e_213_6  = logEquiv1 (\p -> p && (not p)) (const False)
 
 -- All tests
-e_213 = all id [e_213_1a,e_213_1b,e_213_2 ,e_213_3a,e_213_3b,e_213_4a,e_213_4b,e_213_5 ,e_213_6]
+e_213 = and [e_213_1a,e_213_1b,e_213_2 ,e_213_3a,e_213_3b,e_213_4a,e_213_4b,e_213_5 ,e_213_6]
+
+
+
+
+-- Exercise 2.15
+-- First the easy way
+contradiction1 :: (Bool -> Bool) -> Bool
+contradiction1 = logEquiv1 (const False)
+
+contradiction2 :: (Bool -> Bool -> Bool) -> Bool
+contradiction2 = logEquiv2 (const . const $ False)
+
+contradiction3 :: (Bool -> Bool -> Bool -> Bool) -> Bool
+contradiction3 = logEquiv3 (const . const . const $ False)
+
+-- And now doing some actual work...
+contradiction1' bf1 = bf1 True == False && bf1 False == False
+contradiction2' bf1 = and [bf1 p q == False | p <- [True, False],
+                                             q <- [True, False]]
+contradiction3' bf1 = and [bf1 p q r == False | p <- [True, False]
+                                             , q <- [True, False]
+                                             , r <- [True, False]]
+
+-- Exercise 2.16
+-- 1. There is no solution to x² + 1 = 0.
+-- 2. There exists a largest natrual number.
+-- 3. The number 13 is not prime.
+-- 4. The number n is not prime.  ("useful"?)
+-- 5. There is a finite number of primes.
+
+
+-- Exercise 2.17
+-- P = x < y   Q = y < z
+-- x < y < z = P ∧ Q
+
+-- ¬ (P ∧ Q) = ¬ P ∨ ¬ Q
+-- ¬ P = x >= y
+-- ¬ Q = y >= z
+-- ¬ P ∨ ¬ Q   =   x >= y ∨ y >= z
+
+-- x >= y ∨ y >= z
+
+
+-- Exercise 2.18
+-- The approach is to treat Φ and Ψ as opaque statements which have value either False or True.
+-- In that sense, we can just call them P and Q for now.
+
+-- P <=> Q | (¬P <=> ¬Q)
+-- t  t  t |  f   t  f
+-- t  f  f |  f   f  t
+-- f  f  t |  t   f  f
+-- f  t  f |  t   t  t
+e_218_1 = logEquiv2 (<=>) (\p q -> (not p) <=> (not q))
+
+-- ¬ P <=>  Q | P <=>  ¬Q
+-- f t  f'  t | t  f'  f
+-- f t  t'  f | t  t'  t
+-- t f  t'  t | f  t'  f
+-- t f  f'  f | f  f'  t
+e_218_2 =  logEquiv2 (\p q -> (not p) <=> q) (\p q -> p <=> (not q))
+
+-- Exercise 2.19
+-- check notebook...
+
+-- Exercise 2.20
+e_220_1 = logEquiv2 (\p q   -> (not p) ==> q)   (\p q   -> p ==> (not q))
+e_220_2 = logEquiv2 (\p q   -> (not p) ==> q)   (\p q   -> q ==> (not p))
+e_220_3 = logEquiv2 (\p q   -> (not p) ==> q)   (\p q   -> (not q) ==> p)
+e_220_4 = logEquiv3 (\p q r -> p ==> (q ==> r)) (\p q r -> q ==> (p ==> r))
+e_220_5 = logEquiv3 (\p q r -> p ==> (q ==> r)) (\p q r -> (p ==> q) ==> r)
+e_220_6 = logEquiv2 (\p q   -> (p ==> q) ==> p) const
+e_220_7 = logEquiv3 (\p q r -> p || q ==> r) (\p q r -> (p ==> r) && (q ==> r))
+e_220   = filter (not . snd) $ zip [1..] [e_220_1, e_220_2, e_220_3, e_220_4, e_220_5, e_220_6, e_220_7]
+-- (1,False),(2,False),(5,False)
+
+
+-- Exercise 2.22
+-- Let a,b ∈ R such that a < b. Then c = (a+b)/2 ∈ R.
