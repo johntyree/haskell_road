@@ -52,7 +52,7 @@ valid4 bf = and [ bf p q r s | p <- [True,False],
 
 logEquiv1 ::  (Bool -> Bool) -> (Bool -> Bool) -> Bool
 logEquiv1 bf1 bf2 =
-    (bf1 True  <=> bf2 True) && (bf1 False <=> bf2 False)
+    (bf1 True <=> bf2 True) && (bf1 False <=> bf2 False)
 
 logEquiv2 :: (Bool -> Bool -> Bool) ->
                     (Bool -> Bool -> Bool) -> Bool
