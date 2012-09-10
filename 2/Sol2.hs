@@ -204,7 +204,9 @@ e_218_1 = logEquiv2 (<=>) (\p q -> (not p) <=> (not q))
 e_218_2 =  logEquiv2 (\p q -> (not p) <=> q) (\p q -> p <=> (not q))
 
 -- Exercise 2.19
--- check notebook...
+-- If Φ <=> Ψ is a tautology, then Φ is true whenever Ψ is true and Φ is
+-- false whenever Ψ is false. This is the definition of equivalent, thus
+-- Φ ≡ Ψ
 
 -- Exercise 2.20
 e_220_1 = logEquiv2 (\p q   -> (not p) ==> q)   (\p q   -> p ==> (not q))
@@ -220,3 +222,26 @@ e_220   = filter (not . snd) $ zip [1..] [e_220_1, e_220_2, e_220_3, e_220_4, e_
 
 -- Exercise 2.22
 -- Let a,b ∈ R such that a < b. Then c = (a+b)/2 ∈ R.
+
+-- Exercise 2.51
+-- Unique is True iff exactly ONE of (map p [a]) is True.
+unique :: (a -> Bool) -> [a] -> Bool
+unique p l = case (filter p l) of
+                 [_] -> True
+                 _   -> False
+
+
+-- Exercise 2.52
+-- parity xs is True iff an even number of xs's are True
+parity :: [Bool] -> Bool
+parity l = case (filter id l) of
+               (_:_:zs) -> parity zs
+               (_:_)    -> False
+               _        -> True
+
+
+-- Exercise 2.53
+-- evenNR is True iff an even number of xs satisfy p
+evenNR :: (a -> Bool) -> [a] -> Bool
+evenNR p = parity . map p
+
