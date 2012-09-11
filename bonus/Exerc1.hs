@@ -41,14 +41,15 @@ solution4 = [(j, b) | j <- [Knight, Knave]
             ]
 
 -- Example puzzle
--- Door 1 says opening this door is better than opening that door.
--- Door 2 says "Door 1 is a liar. And has the tiger."
+-- Door 1 says opening that door is better than opening this door.
+-- Door 2 says "The door with the Tiger is not lying."
+-- At least one sign is false.
+s1 (d1, d2) = d1 == Tiger
+s2 (d1, d2) = d1 == Tiger && s1 (d1,d2) || d2 == Tiger && s2 (d1,d2)
 
-s1 (d1, d2) = d1 == Lady
-s2 (d1, d2) = not (s1 (d1, d2)) && d1 == Tiger
-
+-- [(Lady, Tiger)]
 solution5 = [(d1, d2) | d1 <- [Lady, Tiger]
                       , d2 <- [Lady, Tiger]
-                      , s1 (d1,d2) || s2 (d1,d2)
                       , d1 /= d2
+                      , not (s1 (d1, d2) && s2 (d1, d2))
             ]
