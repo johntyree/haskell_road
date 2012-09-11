@@ -16,7 +16,7 @@ import TAMO
 
 
 -- Exercise 2.4
--- Truth table for "not (P <=> Q)"
+-- Truth table for ¬ (P <=> Q)
 -- P | Q | ¬ (P <=> Q)
 -- t | t | f'    t
 -- t | f | t'    f
@@ -125,8 +125,8 @@ import TAMO
 
 -- Exercise 2.13
 -- Defining the tests for theorem 2.12
-e_213_1a = logEquiv1 (const (not True)) (const False)
-e_213_1b = logEquiv1 (const (not False)) (const True)
+e_213_1a = logEquiv1 (const (not True)) (const False) -- not True == False
+e_213_1b = logEquiv1 (const (not False)) (const True) -- not False == True
 
 e_213_2  = logEquiv1 (==> False) not
 

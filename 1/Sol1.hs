@@ -4,6 +4,8 @@ module Sol1 where
 
 import GS
 
+
+
 -- Exercise 1.4
 -- If we change k^2 > n to k^2 >= n, we do not affect the outcome of the
 -- program. If k^2 == n, then n/k == k and "divides k n" will have been
@@ -11,16 +13,18 @@ import GS
 
 
 -- Exercise 1.5
--- prime0 Already exists in GS.hs...
+-- I guess prime0 Already exists in GS.hs...
 prime0' :: Integer -> Bool
 prime0' n | n < 1     = error "Not a positive integer."
           | n == 1    = False
           | otherwise = ld n == n
 
+
 -- Exercise 1.6
 -- rem takes an argument of type Integer and returns a function which takes
 -- an Integer and returns an Integer, thus
 -- rem :: Integral a => a -> a -> a
+
 
 -- Exercise 1.7
 --   *Prime> :t divides
@@ -95,7 +99,7 @@ blowup' = concat . zipWith replicate [1..]
 
 
 -- Exercise 1.15
--- At first I didn't realize you could compare on lists
+-- At first we didn't realize you could compare on lists
 listCmp :: Ord a => [a] -> [a] -> Ordering
 listCmp [] [] = EQ
 listCmp x []  = GT
@@ -122,8 +126,7 @@ srtString = listSort
 minElem :: Ord a => [a] -> a
 minElem [] = error "Empty list."
 minElem [x] = x
-minElem (x:y:xs) | x < y     = minElem (x:xs)
-                 | otherwise = minElem (y:xs)
+minElem (x:xs) = min x (minElem xs)
 
 sort :: Ord a => [a] -> [a]
 sort [] = []
@@ -133,6 +136,7 @@ srtString' :: [String] -> [String]
 srtString' = sort
 
 -- Mergesort is a more suitable algorithm
+msort :: (a -> a -> Bool) -> [a] -> [a]
 msort p l@(_:_:_) = merge (msort p left) (msort p right)
     where
       (left, right) = split l l
@@ -143,6 +147,9 @@ msort p l@(_:_:_) = merge (msort p left) (msort p right)
       merge (l:ls) (r:rs) | p l r     = l : merge ls (r:rs)
                           | otherwise = r : merge (l:ls) rs
 msort _ l = l
+
+srtString'' :: [String] -> [String]
+srtString'' = msort (<)
 
 
 
@@ -161,7 +168,7 @@ substring :: String -> String -> Bool
 substring = sublist
 
 substring' xs [] = prefix' xs []
-substring' xs ys | prefix' xs ys            = True
+substring' xs ys | prefix' xs ys           = True
                  | substring' xs (tail ys) = True
                  | otherwise               = False
 
