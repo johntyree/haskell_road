@@ -55,6 +55,9 @@ maxInt (x:xs) = max x (maxInt xs)
 maxInt' :: Integral a => [a] -> a
 maxInt' = foldr1 max
 
+maxInt'' :: Integral a => [a] -> a
+maxInt'' = maximum
+
 
 -- Exercise 1.10
 -- In general we would want type
@@ -63,7 +66,7 @@ maxInt' = foldr1 max
 removeFst :: Integral a => a -> [a] -> [a]
 removeFst = removeFst'
 removeFst' :: Eq a => a -> [a] -> [a]
-removeFst' m [] = []
+removeFst' _ [] = []
 removeFst' m (x:xs) | m == x = xs
                     | otherwise = x : removeFst' m xs
 
@@ -135,6 +138,7 @@ sort xs = let m = minElem xs in m : sort (removeFst' m xs)
 srtString' :: [String] -> [String]
 srtString' = sort
 
+
 -- Mergesort is a more suitable algorithm
 msort :: (a -> a -> Bool) -> [a] -> [a]
 msort p l@(_:_:_) = merge (msort p left) (msort p right)
@@ -156,8 +160,8 @@ srtString'' = msort (<)
 -- Exercise 1.17
 -- We'll use a generalized prefix in our substring definition
 prefix' :: Eq a => [a] -> [a] -> Bool
-prefix' [] _          = True
-prefix' _ []          = False
+prefix' []     _      = True
+prefix' _      []     = False
 prefix' (x:xs) (y:ys) = (x == y) && prefix' xs ys
 
 sublist :: Eq a => [a] -> [a] -> Bool
@@ -167,6 +171,7 @@ sublist xs ys         = prefix' xs ys
 substring :: String -> String -> Bool
 substring = sublist
 
+substring' :: String -> String -> Bool
 substring' xs [] = prefix' xs []
 substring' xs ys | prefix' xs ys           = True
                  | substring' xs (tail ys) = True
@@ -207,6 +212,7 @@ lengths :: [[a]] -> [Int]
 lengths = map length
 
 -- Exercise 1.21
+sumLengths :: [[a]] -> Int
 sumLengths = sum . lengths
 
 
@@ -218,7 +224,7 @@ sumLengths = sum . lengths
 -- to
 
 -- ldp = ldfp primes1
--- 
+--
 -- We do not change the semantics at all. In the first case, we explicitly
 -- state the argument 'n' and then apply "ldpf primes1" to it. In the
 -- second case, we simply return the function "ldpf primes1", which
