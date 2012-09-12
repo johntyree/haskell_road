@@ -1,29 +1,29 @@
 module Week2
 
-where 
+where
 
 import Data.List
 import Data.Char
 
 data Coin = C Int
 
-w :: Coin -> Float 
-w (C n) = if n == lighter then 1 - 0.01
-          else if n == heavier then 1 + 0.01
-          else 1
+w :: Coin -> Float
+w (C n) | n == lighter = 1 - 0.01
+        | n == heavier = 1 + 0.01
+        | otherwise    = 1
 
 weight :: [Coin] -> Float
 weight = sum . (map w)
 
-balance :: [Coin] -> [Coin] -> Ordering 
-balance xs ys = 
+balance :: [Coin] -> [Coin] -> Ordering
+balance xs ys =
   if weight xs < weight ys then LT
   else if weight xs > weight ys then GT
   else EQ
 
 --outcome :: Num a => (a -> Bool) -> (a, Bool -> a) -> a
 outcome :: (Float -> Bool) -> (Float, Bool -> Float) -> Float
-outcome accept (x,decide) = 
+outcome accept (x, decide) =
   if accept x then x + (decide True)
               else (1 - x) + (decide False)
 
@@ -45,18 +45,18 @@ data Form = Prop Name
           | Neg  Form
           | Cnj [Form]
           | Dsj [Form]
-          | Impl Form Form 
-          | Equiv Form Form 
+          | Impl Form Form
+          | Equiv Form Form
           deriving Eq
 
-instance Show Form where 
+instance Show Form where
   show (Prop x)   = show x
-  show (Neg f)    = '-' : show f 
+  show (Neg f)    = '-' : show f
   show (Cnj fs)     = "*(" ++ showLst fs ++ ")"
   show (Dsj fs)     = "+(" ++ showLst fs ++ ")"
-  show (Impl f1 f2)  = "(" ++ show f1 ++ "==>" 
+  show (Impl f1 f2)  = "(" ++ show f1 ++ "==>"
                            ++ show f2 ++ ")"
-  show (Equiv f1 f2)  = "(" ++ show f1 ++ "<=>" 
+  show (Equiv f1 f2)  = "(" ++ show f1 ++ "<=>"
                            ++ show f2 ++ ")"
 
 showLst,showRest :: [Form] -> String
@@ -74,7 +74,7 @@ form2 = Equiv (Impl p q) (Impl (Neg p) (Neg q))
 form3 = Impl (Cnj [Impl p q, Impl q r]) (Impl p r)
 
 propNames :: Form -> [Name]
-propNames = sort.nub.pnames where 
+propNames = sort.nub.pnames where
   pnames (Prop name) = [name]
   pnames (Neg f)  = pnames f
   pnames (Cnj fs) = concat (map pnames fs)
@@ -87,7 +87,7 @@ type Valuation = [(Name,Bool)]
 -- all possible valuations for a list of prop letters
 genVals :: [Name] -> [Valuation]
 genVals [] = [[]]
-genVals (name:names) = 
+genVals (name:names) =
   map ((name,True) :) (genVals names)
   ++ map ((name,False):) (genVals names)
 
@@ -103,28 +103,28 @@ eval ((i,b):xs) (Prop c)
 eval xs (Neg f)  = not (eval xs f)
 eval xs (Cnj fs) = all (eval xs) fs
 eval xs (Dsj fs) = any (eval xs) fs
-eval xs (Impl f1 f2) = 
+eval xs (Impl f1 f2) =
      not (eval xs f1) || eval xs f2
 eval xs (Equiv f1 f2) = eval xs f1 == eval xs f2
 
 satisfiable :: Form -> Bool
 satisfiable f = any (\ v -> eval v f) (allVals f)
 
--- no precondition: should work for any formula. 
-arrowfree :: Form -> Form 
-arrowfree (Prop x) = Prop x 
+-- no precondition: should work for any formula.
+arrowfree :: Form -> Form
+arrowfree (Prop x) = Prop x
 arrowfree (Neg f) = Neg (arrowfree f)
 arrowfree (Cnj fs) = Cnj (map arrowfree fs)
 arrowfree (Dsj fs) = Dsj (map arrowfree fs)
-arrowfree (Impl f1 f2) = 
+arrowfree (Impl f1 f2) =
   Dsj [Neg (arrowfree f1), arrowfree f2]
-arrowfree (Equiv f1 f2) = 
+arrowfree (Equiv f1 f2) =
   Dsj [Cnj [f1', f2'], Cnj [Neg f1', Neg f2']]
   where f1' = arrowfree f1
         f2' = arrowfree f2
 
 -- precondition: input is arrowfree
-nnf :: Form -> Form 
+nnf :: Form -> Form
 nnf (Prop x) = Prop x
 nnf (Neg (Prop x)) = Neg (Prop x)
 nnf (Neg (Neg f)) = nnf f
