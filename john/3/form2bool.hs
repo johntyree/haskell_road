@@ -21,3 +21,6 @@ entails f1 f2 = tautology (Impl f1 f2)
 
 equiv :: Form -> Form -> Bool
 equiv f1 f2 = tautology (Cnj [(Impl f1 f2), (Impl f2 f1)])
+
+-- Time: 1 hour to figure out what entails *really* means w.r.t.
+-- implication. 5 minutes to write and check functions.
