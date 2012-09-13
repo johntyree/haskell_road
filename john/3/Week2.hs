@@ -47,7 +47,7 @@ data Form = Prop Name
           | Dsj [Form]
           | Impl Form Form
           | Equiv Form Form
-          deriving Eq
+          deriving (Eq, Ord)
 
 instance Show Form where
   show (Prop x)   = show x
@@ -74,7 +74,7 @@ form2 = Equiv (Impl p q) (Impl (Neg p) (Neg q))
 form3 = Impl (Cnj [Impl p q, Impl q r]) (Impl p r)
 
 propNames :: Form -> [Name]
-propNames = sort.nub.pnames where
+propNames = sort . nub . pnames where
   pnames (Prop name) = [name]
   pnames (Neg f)  = pnames f
   pnames (Cnj fs) = concat (map pnames fs)
