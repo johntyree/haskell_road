@@ -47,17 +47,17 @@ data Form = Prop Name
           | Dsj [Form]
           | Impl Form Form
           | Equiv Form Form
-          deriving (Eq, Ord)
+          deriving (Eq, Ord) -- Show, Read)
 
 instance Show Form where
   show (Prop x)   = show x
   show (Neg f)    = '-' : show f
   show (Cnj fs)     = "*(" ++ showLst fs ++ ")"
   show (Dsj fs)     = "+(" ++ showLst fs ++ ")"
-  show (Impl f1 f2)  = "(" ++ show f1 ++ "==>"
-                           ++ show f2 ++ ")"
-  show (Equiv f1 f2)  = "(" ++ show f1 ++ "<=>"
-                           ++ show f2 ++ ")"
+  show (Impl f1 f2)  = "((" ++ show f1 ++ ") ==> ("
+                           ++ show f2 ++ "))"
+  show (Equiv f1 f2)  = "((" ++ show f1 ++ ") <=> ("
+                           ++ show f2 ++ "))"
 
 showLst,showRest :: [Form] -> String
 showLst [] = ""
