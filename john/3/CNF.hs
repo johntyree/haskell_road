@@ -8,7 +8,7 @@ import Week2
 import Form2Bool
 
 fullcnf :: Form -> Form
-fullcnf = cnf . nnf. arrowfree
+fullcnf = cnf . nnf . arrowfree
 
 -- precondition: input is arrow-free and in NNF
 cnf :: Form -> Form
@@ -18,45 +18,54 @@ cnf x = x
 
 -- precondition: f1 p2 are in cnf
 dist :: (Form, Form) -> Form
-
-dist ((Cnj (x:y:z:xs)), f2) = Cnj [dist (x, f2), dist (Cnj (y:z:xs), f2)]
-dist (f1, (Cnj (x:y:z:xs))) = Cnj [dist (f1, x), dist (f1, Cnj (y:z:xs))]
-
 dist ((Cnj (x:y:xs)), f2) = Cnj [dist (x, f2), dist (y, f2)]
 dist (f1, (Cnj (x:y:xs))) = Cnj [dist (f1, x), dist (f1, y)]
-
-dist (Cnj (x:xs), f2) = error $ "Conjunction of single elem L " ++ show (x, xs, f2)
-dist (f1, Cnj (x:xs)) = error $ "Conjunction of single elem R " ++ show x
-
-dist (Dsj f1, Dsj f2)   = Dsj (f1 ++ f2)
-dist (f1, Dsj f2)       = Dsj (f1:f2)
-dist (Dsj f1, f2)       = Dsj (f2:f1)
-dist (f1, f2)           = Dsj [f1, f2]
+dist (Dsj f1, Dsj f2)     = Dsj (f1 ++ f2)
+dist (f1, Dsj f2)         = Dsj (f1:f2)
+dist (Dsj f1, f2)         = Dsj (f2:f1)
+dist (f1, f2)             = Dsj [f1, f2]
 
 
-flatform' :: [Form] -> [Form]
-flatform' (Cnj x : Cnj y : xs) = nub . sort . flatform' $ Cnj (flatform' (x ++ y)) : xs
-flatform' (Dsj x : Dsj y : xs) = nub . sort . flatform' $ Dsj (flatform' (x ++ y)) : xs
-flatform' (x:xs)             = x : (nub . sort . flatform') xs
-flatform' []                 = []
+form4 = Cnj [Cnj [p, q], Dsj [Neg q, r],  Cnj [p, r]]
 
-flatform :: Form -> Form
-flatform (Cnj fs) = Cnj $ flatform' fs
-flatform (Dsj fs) = Dsj $ flatform' fs
-flatform x        = x
+check form = let f = id $ fullcnf form
+             in (form, f, isCnf f, equiv form f)
 
--- flatform (Cnj fs) = foldr go (Cnj []) (map flatform $ sort fs)
-  -- where go (Cnj (Cnj f1 : Cnj f2 : fs)) (Cnj acc) = Cnj ((Cnj (f1 ++ f2)):fs ++ acc)
-        -- go (Csj (Dsj f1 : Dsj f2 : fs)) (Dsj acc) = Dsj ((Dsj (f1 ++ f2)):fs ++ acc)
-        -- go (Cnj fs) (Cnj acc)                     = Cnj (fs ++ acc)
-        -- go (Dsj fs) (Dsj acc)                     = Dsj (fs ++ acc)
-        -- go p        (Cnj acc)                     = Cnj (p:acc)
+isCnf :: Form -> Bool
+isCnf (Dsj fs) = not . any containsCnj $ fs
+isCnf (Cnj fs) = all isCnf fs
+isCnf f        = not $ containsCnj f || containsDsj f
 
--- flatform (Dsj fs) = foldr go (Dsj []) (map flatform $ sort fs)
-  -- where go (Cnj (Cnj f1 : fs)) (Dsj (Cnj f2 : acc)) = Dsj ((Cnj (f1 ++ f2)):fs ++ acc)
-        -- go (Dsj (Dsj f1 : Dsj f2 : fs)) (Dsj (Cnj f2 : acc) = Dsj ((Dsj (f1 ++ f2)):fs ++ acc)
-        -- go (Dsj fs) (Dsj acc)                     = Dsj (fs ++ acc)
-        -- go (Cnj fs) (Cnj acc)                     = Cnj (fs ++ acc)
-        -- go p                            (Dsj acc) = Dsj (p:acc)
+containsCnj :: Form -> Bool
+containsCnj (Cnj fs) = True
+containsCnj (Dsj fs) = any containsCnj fs
+containsCnj _        = False
 
--- flatform f = f
+isDnf :: Form -> Bool
+isDnf (Dsj fs) = all isDnf fs
+isDnf (Cnj fs) = not . any containsDsj $ fs
+
+containsDsj :: Form -> Bool
+containsDsj (Cnj fs) = any containsDsj fs
+containsDsj (Dsj fs) = True
+containsDsj _        = False
+
+
+flatform (Cnj fs) = foldr go (Cnj []) (map flatform fs)
+  where
+    go (Cnj fs) (Cnj acc) = Cnj (map flatform fs ++ acc)
+    go f (Cnj acc) = Cnj (f:acc)
+
+flatform (Dsj fs) = foldr go (Dsj []) (map flatform fs)
+  where
+    go (Dsj fs) (Dsj acc) = Dsj (map flatform fs ++ acc)
+    go f (Dsj acc) = Dsj (f:acc)
+
+flatform f = f
+
+simplifyCnj (Cnj (x:xs)) = map f xs
+    where f (Neg y) = x == y
+          f _       = False
+
+
+
