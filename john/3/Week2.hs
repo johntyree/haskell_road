@@ -1,9 +1,11 @@
+{-# LANGUAGE DeriveDataTypeable #-}
 module Week2
 
 where
 
-import Data.List
+import Data.Set (toAscList, singleton, unions)
 import Data.Char
+import Data.Typeable
 
 data Coin = C Int
 
@@ -39,7 +41,7 @@ run n | n < 1 = error "argument not positive"
       | even n = n: run (div n 2)
       | odd n  = n: run (3*n+1)
 
-type Name = Int
+type Name = Integer
 
 data Form = Prop Name
           | Neg  Form
@@ -47,7 +49,7 @@ data Form = Prop Name
           | Dsj [Form]
           | Impl Form Form
           | Equiv Form Form
-          deriving (Eq, Ord)
+          deriving (Eq, Ord, Typeable)
 
 instance Show Form where
   show (Prop x)   = show x
@@ -74,13 +76,13 @@ form2 = Equiv (Impl p q) (Impl (Neg p) (Neg q))
 form3 = Impl (Cnj [Impl p q, Impl q r]) (Impl p r)
 
 propNames :: Form -> [Name]
-propNames = nub . sort . pnames where
-  pnames (Prop name) = [name]
+propNames = toAscList . pnames where
+  pnames (Prop name) = singleton name
   pnames (Neg f)  = pnames f
-  pnames (Cnj fs) = concat (map pnames fs)
-  pnames (Dsj fs) = concat (map pnames fs)
-  pnames (Impl f1 f2) = concat (map pnames [f1,f2])
-  pnames (Equiv f1 f2) =  concat (map pnames [f1,f2])
+  pnames (Cnj fs) = unions (map pnames fs)
+  pnames (Dsj fs) = unions (map pnames fs)
+  pnames (Impl f1 f2) = unions (map pnames [f1,f2])
+  pnames (Equiv f1 f2) =  unions (map pnames [f1,f2])
 
 type Valuation = [(Name,Bool)]
 
