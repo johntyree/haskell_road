@@ -1,0 +1,65 @@
+\documentclass[11pt,a4paper]{article}
+
+%\usepackage{mypack}
+
+\linespread{1.2}
+
+\usepackage{mathtools}
+\usepackage{ucs}
+\usepackage{color}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{amscd}
+\usepackage{fancyhdr}
+\usepackage[margin=1in]{geometry}
+
+\pagestyle{fancy}
+\lhead{}
+\rhead{\nouppercase{\leftmark}}
+\lfoot{}
+\rfoot{}
+\cfoot{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+
+\numberwithin{equation}{section}% 
+%%% Custom sectioning (sectsty package)
+\usepackage{sectsty}% Custom sectioning (see below)
+\allsectionsfont{}% Change font of al section commands
+
+\title{\large{\textbf{Software Testing}} \\ [5pt]
+\large{Week 2 - "Jill and Joe testing" Report}
+}
+
+\author{John Tyree\footnote{\textbf{Student no.:} 6423035 \textbar\ \textbf{E-mail:} \texttt{tyree@science.uva.nl}} \ \ \ \ \ Alex Theiakos\footnote{\textbf{Student no.:} 6386628 \textbar\ \textbf{E-mail:} \texttt{Alexios.Theiakos@student.uva.nl}} \\[15pt] University of Amsterdam (UvA) \\ Computational Science}
+\date{}
+
+\begin{document}
+\maketitle
+
+In order to test the "Jill and Joe" for optimal strategies two different test functions were implemented.
+For the Jill case the test is more simple since Jill is the one who makes the initial choice and thus determines Joe's strategy. Jill knows that if she declines the initial cut, Joe is going to cut the second cake in two equal pieces.
+This means that the optimal strategy for Jill, is Joe to cut a piece that is larger than half plus whatever the remainder from the first cake, or in a mathematical equation:
+\begin{align*}
+    x &\geq (1 - x) + \frac{1}{2} \\
+    x &\geq 0.75
+\end{align*}
+Or Jill has to accept only if the initial cut from Joe is more than $0.75$.
+
+The Jill test takes one argument, the cutoff from Joe. A map operation with a list of possible cuts is performed with the above equation. If the return list consists of \emph{True} expressions the strategy is optimal. To perform less operations the list of possible cuts is $x\in (0.5,0.501...1)$. The argument which represents Joe's cut is placed explicitly in the list.
+
+In the case of Joe, his decision is influenced by Jill's choice. If Jill doesn't accept the cut, he has to cut the second cake in half in order to minimize the loss. If Jill accepts he gets the second cake minus a very small piece that he has to cut and is considered negligible. 
+To test Joe's strategy, a "Jill" program has to run inside Joe's program, in order to emulate Jill's decision. The test takes as arguments the Jill test and the initial cutoff. 
+
+First a map operations in a list of possible cutoffs is performed in order to determine the maximum cake that Joe can have. The result depends on the choice of the Jill program.
+\[
+    \text{Joe's cake} =
+    \begin{dcases*}
+        1 - x + 1 & if Jill accepts \\
+        x + 1/2 & otherwise
+    \end{dcases*}
+\]
+Then the result of Joes cake given the cutoff passed as an argument is compared with the maximum element of the list produced by the map operation. If it's the same the program returns \emph{True}, i.e. the strategy is optimal.
+\end{document}
