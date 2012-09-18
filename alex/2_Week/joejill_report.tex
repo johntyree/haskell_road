@@ -5,23 +5,13 @@
 \linespread{1.2}
 
 \usepackage{mathtools}
-\usepackage{ucs}
+% \usepackage{ucs}
 \usepackage{color}
 \usepackage{amsmath}
 \usepackage{amsthm}
 \usepackage{amssymb}
 \usepackage{amscd}
-\usepackage{fancyhdr}
 \usepackage[margin=1in]{geometry}
-
-\pagestyle{fancy}
-\lhead{}
-\rhead{\nouppercase{\leftmark}}
-\lfoot{}
-\rfoot{}
-\cfoot{\thepage}
-\renewcommand{\headrulewidth}{0.4pt}
-\renewcommand{\footrulewidth}{0.4pt}
 
 
 \numberwithin{equation}{section}% 
@@ -39,18 +29,21 @@
 \begin{document}
 \maketitle
 
-In order to test the "Jill and Joe" for optimal strategies two different test functions were implemented.
-For the Jill case the test is more simple since Jill is the one who makes the initial choice and thus determines Joe's strategy. Jill knows that if she declines the initial cut, Joe is going to cut the second cake in two equal pieces.
-This means that the optimal strategy for Jill, is Joe to cut a piece that is larger than half plus whatever the remainder from the first cake, or in a mathematical equation:
+\section{Jill vs. Joe}
+Time: 20 minutes to prove on paper. 2 hours to devise appropriate tests. \\ \\
+In order to test the "Jill and Joe" for optimal strategies two different test functions were implemented. For simplicity and without loss of generality, we assume that Joe's cuts are all in the range $[0.5, 1]$.
+For the Jill case the test is simple since Jill is the one who makes the initial choice and thus determines Joe's strategy. Jill knows that if she declines the initial cut, Joe is going to cut the second cake into two equal pieces.
+This means that the optimal strategy for Jill, is to accept the piece that Joe offers from the first cake if it is larger than the other piece plus half of the second cake. In mathematical terms:
 \begin{align*}
     x &\geq (1 - x) + \frac{1}{2} \\
     x &\geq 0.75
 \end{align*}
-Or Jill has to accept only if the initial cut from Joe is more than $0.75$.
+where x is the amount of the first cake that Jill receives.
+Clearly, Jill should exercise her right to choose only if the initial cut from Joe is more than $0.75$.
 
-The Jill test takes one argument, the cutoff from Joe. A map operation with a list of possible cuts is performed with the above equation. If the return list consists of \emph{True} expressions the strategy is optimal. To perform less operations the list of possible cuts is $x\in (0.5,0.501...1)$. The argument which represents Joe's cut is placed explicitly in the list.
+The Jill optimality test takes one argument, the piece size cut by Joe. A map operation with a list of possible cuts is performed with the above equation. If the return list consists of \emph{True} expressions the strategy is optimal. To perform fewer operations the list of possible cuts is $x\in (0.5,0.501...1)$. The argument which represents Joe's cut is placed explicitly in the list.
 
-In the case of Joe, his decision is influenced by Jill's choice. If Jill doesn't accept the cut, he has to cut the second cake in half in order to minimize the loss. If Jill accepts he gets the second cake minus a very small piece that he has to cut and is considered negligible. 
+Joe's decision is influenced by Jill's choice. If Jill doesn't accept the cut, he has to cut the second cake in half in order to minimize the loss. If Jill accepts he gets the entire second cake minus a negligibly small piece.
 To test Joe's strategy, a "Jill" program has to run inside Joe's program, in order to emulate Jill's decision. The test takes as arguments the Jill test and the initial cutoff. 
 
 First a map operations in a list of possible cutoffs is performed in order to determine the maximum cake that Joe can have. The result depends on the choice of the Jill program.
@@ -62,4 +55,23 @@ First a map operations in a list of possible cutoffs is performed in order to de
     \end{dcases*}
 \]
 Then the result of Joes cake given the cutoff passed as an argument is compared with the maximum element of the list produced by the map operation. If it's the same the program returns \emph{True}, i.e. the strategy is optimal.
+
+
+\section{Properties of Propositions}
+Time: 1 hour to decide on the meaning of entailment. 5 minutes to implement.
+\begin{itemize}
+    \item \texttt{contradiction :: Form -> Bool} \\
+        For this test, we simply applied the definition of contradiction as given directly in the book. A contradiction is false for all valuations, it is therefore unsatisfiable. We tested by feeding it known contradictions in one or more variables, such as $p \wedge \neg p$.
+    \item \texttt{tautology :: Form -> Bool} \\
+        Again from the definition in the book. $\neg \top \equiv \bot$. We again tested by giving it known tautologies such as $p \vee \neg p$.
+    \item \texttt{entails :: Form -> Bool} \\
+        An entailment something which can only be true if the thing it entails is true. Thus if $\Phi \models \Psi$, then $\Phi \rightarrow \Psi$ is a tautology. We tested this giving our function known tautologies involving implication, such as $p \rightarrow p \vee q$ and $p \wedge q \rightarrow q \vee r$.
+    \item \texttt{entails :: Form -> Bool} \\ 
+        Equivalence of two formulas, $\Phi$ and $\Psi$, means that $\Phi \models \Psi$ and $\Psi \models \Phi$. We define it as such directly. We test it by giving it known equivalent formulas like $p$ and $p$, $p \vee \neg p$ and $q \wedge (q \vee \neg q)$.
+\end{itemize}
+
+
+\section{Transformation to Conjunctive Normal Form}
+Time: 4 hours + 2 more to figure out quickCheck.
+
 \end{document}
