@@ -19,9 +19,7 @@
 \usepackage{sectsty}% Custom sectioning (see below)
 \allsectionsfont{}% Change font of al section commands
 
-\title{\large{\textbf{Software Testing}} \\ [5pt]
-\large{Week 2 - "Jill and Joe testing" Report}
-}
+\title{\large \textbf{Software Testing} \--- Week 2}
 
 \author{John Tyree\footnote{\textbf{Student no.:} 6423035 \textbar\ \textbf{E-mail:} \texttt{tyree@science.uva.nl}} \ \ \ \ \ Alex Theiakos\footnote{\textbf{Student no.:} 6386628 \textbar\ \textbf{E-mail:} \texttt{Alexios.Theiakos@student.uva.nl}} \\[15pt] University of Amsterdam (UvA) \\ Computational Science}
 \date{}
@@ -72,6 +70,33 @@ Time: 1 hour to decide on the meaning of entailment. 5 minutes to implement.
 
 
 \section{Transformation to Conjunctive Normal Form}
-Time: 4 hours + 2 more to figure out quickCheck.
+Time: 5 hours + 2 more to figure out QuickCheck.
 
+For the conversion task we created the following:
+\begin{itemize}
+    \item \texttt{cnf :: Form -> Form} \---
+        This function has the precondition that the formula is both arrowfree and in nnf. It maps to an equivalent function which is in conjunctive normal form.
+    \item \texttt{dist :: Form -> Form} \---
+        This is a helper function to push disjunctions inside of conjunctions.
+\end{itemize}
+
+To test this we wrote functions to check if a formula is in valid CNF and is equivalent to the original formula.
+\begin{itemize}
+    \item \texttt{isCnf :: Form -> Bool} \--- True iff the formula is in conjunctive normal form.
+    \item \texttt{containsCnj :: Form -> Bool} \--- True iff the formula contains a conjunction.
+    \item \texttt{containsDsj :: Form -> Bool} \--- True iff the formula contains a disjunction.
+    \item \texttt{prop\_equiv :: Form -> Form -> Bool} \--- True iff the two formulas are equivalent.
+    \item \texttt{prop\_valid :: Form -> Bool} \--- True iff the converted formula is in valid CNF.
+\end{itemize}
+
+We now had the tools to check if an arbitrary formula had been properly converted to CNF. We constructed some simple formulas by hand to test these functions. For thorough testing (and personal growth), we created an instance of Arbitrary Form to use with QuickCheck. 
+
+To preventing QuickCheck from creating enormous \texttt{Form}s due to recursion, we had to introduce a distribution over the values. Additionally we made functions
+\begin{itemize}
+    \item \texttt{complexity :: Form -> Int} \--- The number of subformulas.
+    \item \texttt{depthBetween :: Int -> Int -> Form -> Bool} \--- True iff the leaves of the expression tree are between the first two arguments in depth.
+\end{itemize}
+to control the size of QuickCheck's arbitrary values.
+
+After handling problems of explosive recursion, we had great success. The following checks $n$ randomly generated formulas of medium size: \texttt{runTests n}.
 \end{document}

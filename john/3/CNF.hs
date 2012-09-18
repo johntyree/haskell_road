@@ -73,9 +73,9 @@ flatform f = f
 -- * Extra functions for testing
 
 isCnf :: Form -> Bool
-isCnf (Dsj fs) = (not . any containsCnj $ fs) ||  error (intercalate "\n" ("Had cnj under dsj: " : map show fs))
+isCnf (Dsj fs) = (not . any containsCnj $ fs) || error (intercalate "\n" ("Had cnj under dsj: " : map show fs))
 isCnf (Cnj fs) = all isCnf fs
-isCnf f        = not $ containsCnj f || containsDsj f || error ("Had cnj or dsj under prop: " ++ show f)
+isCnf f        = (not $ containsCnj f || containsDsj f) || error ("Had cnj or dsj under prop: " ++ show f)
 
 
 containsCnj :: Form -> Bool
@@ -134,18 +134,17 @@ runTests n = mapM_ (verboseCheckWith stdArgs {maxSuccess = n}) properties
 
 
 instance Arbitrary Form where
-    arbitrary = sized $ \n -> uniformWith (shared $ map (head . snd) . drop 1 . boundedBoth 2 $ n) n
-    -- arbitrary = complexEnough $ arb
-      -- where
-        -- arb = frequency [ (22, Prop <$> choose (0,3))
-                        -- , (6, Neg   <$> arb)
-                        -- , (2, Cnj   <$> longEnough (resize 5 (listOf arb)))
-                        -- , (2, Dsj   <$> longEnough (resize 5 (listOf arb)))
-                        -- , (1, Impl  <$> arb <*> arb)
-                        -- , (1, Equiv <$> arb <*> arb)
-                        -- ]
-        -- longEnough g  = suchThat g (\l -> length l > 1)
-        -- complexEnough = flip suchThat (depthBetween 4 15)
+    arbitrary = complexEnough $ arb
+      where
+        arb = frequency [ (22, Prop <$> choose (0,3))
+                        , (6, Neg   <$> arb)
+                        , (2, Cnj   <$> longEnough (resize 5 (listOf arb)))
+                        , (2, Dsj   <$> longEnough (resize 5 (listOf arb)))
+                        , (1, Impl  <$> arb <*> arb)
+                        , (1, Equiv <$> arb <*> arb)
+                        ]
+        longEnough g  = suchThat g (\l -> length l > 1)
+        complexEnough = flip suchThat (depthBetween 4 15)
 
 instance CoArbitrary Form where
     coarbitrary c = case p of
@@ -156,49 +155,3 @@ instance CoArbitrary Form where
         Impl  f g -> variant 4 . coarbitrary f . coarbitrary g
         Equiv f g -> variant 5 . coarbitrary f . coarbitrary g
 
-
-instance Enumerable Form
-  where
-    enumerate = consts $
-        [ pay . pay $ Impl <$> shared <*> shared
-        , pay . pay $ Equiv <$> shared <*> shared
-        , pay $ unary $ Cnj . nonEmpty
-        , pay $ unary $ Dsj . nonEmpty
-        , unary Neg
-        , fromParts [Finite 4 Prop]
-        ]
-
--- +(-((-1) ==> (2)) 3 *(-2) 3 --((3) <=> (3)) *(3 3) -3 --0 1 1)
-f1 = Neg (Dsj [Impl (Prop 0) (Neg (Neg (Neg (Prop 1)))),Impl (Prop 2) (Equiv (Equiv (Prop 3) (Prop 0)) (Prop 2)),Equiv (Cnj [Equiv (Prop 1) (Equiv (Neg (Prop 1)) (Prop 3))]) (Cnj [Neg (Impl (Prop 3) (Prop 0))]),Prop 2,Prop 0,Prop 1,Neg (Neg (Prop 3)),Impl (Prop 0) (Impl (Prop 1) (Neg (Prop 1))),Impl (Prop 2) (Prop 1),Neg (Neg (Prop 2))])
-
-f2 = Equiv (Prop 1) (Equiv (Neg (Neg (Dsj [Prop 1]))) (Prop 2))
-
--- | Non class version of 'bounded'.
-boundedBoth :: (Enumerable a, Integral b) => b -> b -> [(Integer,[a])]
-boundedBoth l h = let (l':h':_) = map fromIntegral [l, h]
-                  in  map (samplePart l' h') $ parts optimal
-
--- Specification: pick at most @m@ evenly distributed values from part @p@ of @e@
--- Return the list length together with the list of the selected values.
-samplePart :: Integral b => Index -> Index -> Finite a -> (b,[a])
-samplePart l h (Finite crd ix) =
-  let  step  =  crd % h
-  in if crd <= h
-       then (crd,  map ix [l..crd - 1])
-       else (h,    map ix [ round (k * step)
-                                    | k <- map toRational [l..h-1]])
--- The first value is at index 0 and the last value is at index ~= crd - step
--- This is "fair" if we consider using samplePart on the next part as well.
--- An alternative would be to make the last index used |crd-1|.
-
--- | Non class version of 'uniform'.
-uniformWith :: Enumerate a -> Int -> Gen a
-uniformWith = uni . parts where
-  uni :: [Finite a] -> Int -> Gen a
-  uni  []  _     =  error "uniform: empty enumeration"
-  uni  ps  maxp  =  let  (incl, rest)  = splitAt maxp ps
-                         fin           = mconcat incl
-    in  case fCard fin of
-          0  -> uni rest 1
-          _  -> do  i <- choose (0,fCard fin-1)
-                    return (fIndex fin i)
