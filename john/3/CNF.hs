@@ -130,14 +130,14 @@ properties = [ prop_equiv
              , prop_valid
              ]
 
-runTests n = mapM_ (verboseCheckWith stdArgs {maxSuccess = n}) properties
+runCnfTests n = mapM_ (verboseCheckWith stdArgs {maxSuccess = n}) properties
 
 
 instance Arbitrary Form where
     arbitrary = complexEnough $ arb
       where
-        arb = frequency [ (22, Prop <$> choose (0,3))
-                        , (6, Neg   <$> arb)
+        arb = frequency [ (25, Prop <$> choose (0,3))
+                        , (7, Neg   <$> arb)
                         , (2, Cnj   <$> longEnough (resize 5 (listOf arb)))
                         , (2, Dsj   <$> longEnough (resize 5 (listOf arb)))
                         , (1, Impl  <$> arb <*> arb)

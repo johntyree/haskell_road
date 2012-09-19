@@ -3,8 +3,11 @@
 module Main where
 
 import Week2
+import JoeJill
 import Form2Bool
 import CNF
 
 
-main = runTests 300
+main = do
+    --runJoeJillTests
+    runCnfTests 1000

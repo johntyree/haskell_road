@@ -30,7 +30,7 @@ testjoe (fakejill) x = (joescake x == maximum (map joescake testvals))
                   | otherwise  = x + 1/2
 
 
-runTests = do
+runJoeJillTests = do
     print $ map testjill [0.5, 0.64, 0.75, 0.85, 1] -- Jill is optimal at 0.75
     print ""
     print $ map (\x -> testjoe (const False) (x :: Ratio Integer)) [0.5, 0.64, 0.75, 0.85, 1] -- Jill always defers, optimal @ 1
