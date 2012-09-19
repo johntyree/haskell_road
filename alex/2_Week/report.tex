@@ -27,7 +27,7 @@
 \begin{document}
 \maketitle
 
-\section{Jill vs. Joe}
+\section{Jill vs. Joe \--- JoeJill.hs}
 Time: 20 minutes to prove on paper. 2 hours to devise appropriate tests. \\ \\
 In order to test the "Jill and Joe" for optimal strategies two different test functions were implemented. For simplicity and without loss of generality, we assume that Joe's cuts are all in the range $[0.5, 1]$.
 For the Jill case the test is simple since Jill is the one who makes the initial choice and thus determines Joe's strategy. Jill knows that if she declines the initial cut, Joe is going to cut the second cake into two equal pieces.
@@ -55,7 +55,7 @@ First a map operations in a list of possible cutoffs is performed in order to de
 Then the result of Joes cake given the cutoff passed as an argument is compared with the maximum element of the list produced by the map operation. If it's the same the program returns \emph{True}, i.e. the strategy is optimal.
 
 
-\section{Properties of Propositions}
+\section{Properties of Propositions \--- Form2Bool.hs}
 Time: 1 hour to decide on the meaning of entailment. 5 minutes to implement.
 \begin{itemize}
     \item \texttt{contradiction :: Form -> Bool} \\
@@ -69,7 +69,7 @@ Time: 1 hour to decide on the meaning of entailment. 5 minutes to implement.
 \end{itemize}
 
 
-\section{Transformation to Conjunctive Normal Form}
+\section{Transformation to Conjunctive Normal Form \--- CNF.hs}
 Time: 5 hours + 2 more to figure out QuickCheck.
 
 For the conversion task we created the following:
@@ -98,5 +98,5 @@ To preventing QuickCheck from creating enormous \texttt{Form}s due to recursion,
 \end{itemize}
 to control the size of QuickCheck's arbitrary values.
 
-After handling problems of explosive recursion, we had great success. The following checks $n$ randomly generated formulas of medium size: \texttt{runTests n}.
+After handling problems of explosive recursion, we had great success. The following checks $n$ randomly generated formulas of medium size: \texttt{runCnfTests n}.
 \end{document}
