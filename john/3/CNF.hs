@@ -6,9 +6,6 @@ import Data.List hiding (nub)
 import Data.Set (toAscList, fromList)
 import Test.QuickCheck
 import Control.Applicative
-import Test.Feat
-import Test.Feat.Modifiers
-import Test.Feat.Enumerate
 import Data.Ratio ((%))
 
 import Week2
