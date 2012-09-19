@@ -1,1 +1,0 @@
-../lib/TAMO.hs
