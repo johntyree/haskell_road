@@ -52,7 +52,7 @@ First a map operations in a list of possible cutoffs is performed in order to de
         x + 1/2 & otherwise
     \end{dcases*}
 \]
-Then the result of Joes cake given the cutoff passed as an argument is compared with the maximum element of the list produced by the map operation. If it's the same the program returns \emph{True}, i.e. the strategy is optimal.
+Then the result of Joes cake given the cutoff passed as an argument is compared with the maximum element of the list produced by the map operation. If it's the same the program returns \emph{True}, i.e. the strategy is optimal.A small test with some cases of Jill-behavior is presented in \texttt{runJoeJillTests}. Values of True, indicate the optimal strategy.
 
 
 \section{Properties of Propositions \--- Form2Bool.hs}
@@ -63,9 +63,9 @@ Time: 1 hour to decide on the meaning of entailment. 5 minutes to implement.
     \item \texttt{tautology :: Form -> Bool} \\
         Again from the definition in the book. $\neg \top \equiv \bot$. We again tested by giving it known tautologies such as $p \vee \neg p$.
     \item \texttt{entails :: Form -> Bool} \\
-        An entailment something which can only be true if the thing it entails is true. Thus if $\Phi \models \Psi$, then $\Phi \rightarrow \Psi$ is a tautology. We tested this giving our function known tautologies involving implication, such as $p \rightarrow p \vee q$ and $p \wedge q \rightarrow q \vee r$.
-    \item \texttt{entails :: Form -> Bool} \\ 
-        Equivalence of two formulas, $\Phi$ and $\Psi$, means that $\Phi \models \Psi$ and $\Psi \models \Phi$. We define it as such directly. We test it by giving it known equivalent formulas like $p$ and $p$, $p \vee \neg p$ and $q \wedge (q \vee \neg q)$.
+        $\Phi$ entails $\Psi$ iff there is a way to construct $\Psi$ starting only from $\Phi$. Thus if $\Phi \models \Psi$, then $\Phi \rightarrow \Psi$ is a tautology. We tested this giving our function known tautologies involving implication, such as $p \rightarrow p \vee q$ and $p \wedge q \rightarrow q \vee r$.
+    \item \texttt{equiv :: Form -> Bool} \\ 
+        Equivalence of two formulas, $\Phi$ and $\Psi$, means that $\Phi \models \Psi$ and $\Psi \models \Phi$. We define it as such directly. We test it by giving it known equivalent formulas like $p$ and $p$, $p \vee \neg p$ and $q \rightarrow (q \vee p)$.
 \end{itemize}
 
 
@@ -98,5 +98,5 @@ To preventing QuickCheck from creating enormous \texttt{Form}s due to recursion,
 \end{itemize}
 to control the size of QuickCheck's arbitrary values.
 
-After handling problems of explosive recursion, we had great success. The following checks $n$ randomly generated formulas of medium size: \texttt{runCnfTests n}.
+After handling problems of explosive recursion, we had great success. The following checks $n$ randomly generated formulas of medium size for correct form and equivalence: \texttt{runCnfTests n}.
 \end{document}
