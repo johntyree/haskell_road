@@ -3,6 +3,11 @@
 \documentclass[a4paper,10pt]{article}
 \usepackage{fullpage}
 \usepackage{amsmath}
+\usepackage{sectsty}% Custom sectioning (see below)
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{amssymb}
+\usepackage{amscd}
 \usepackage{times}
 \usepackage{amssymb}
 \usepackage{graphicx}
@@ -11,7 +16,7 @@
 \usepackage{wrapfig}
 \usepackage{gensymb}
 \usepackage{array}
-\usepackage{titling}
+% \usepackage{titling}
 
 \usepackage{listings}
 \lstloadlanguages{Haskell}
@@ -38,27 +43,35 @@
                {|}{{$\mid$}}1
     }
 
-\newcommand{\TODO}{{\huge\emph{\color{red}!}}}
+% \newcommand{\TODO}{{\huge\emph{\color{red}!}}}
+% \allsectionsfont{}% Change font of al section commands
 
-% Hyperref must be last
-\usepackage[backref,colorlinks,linkcolor=blue]{hyperref}
-\usepackage[all]{hypcap}  % Fix links to figures
+% % Hyperref must be last
+% \usepackage[backref,colorlinks,linkcolor=blue]{hyperref}
+% \usepackage[all]{hypcap}  % Fix links to figures
+
+
+
+\numberwithin{equation}{section}% 
 
 \title{Software Testing: Week 3}
-\author{John Tyree\\
-University of Amsterdam\\
-\texttt{tyree@science.uva.nl}}
+\author{
+John Tyree\footnote{\textbf{Student no.:} 6423035 \textbar\ \textbf{E-mail:} \texttt{tyree@science.uva.nl}} \ \ \ \ \ Alex Theiakos\footnote{\textbf{Student no.:}   6386628 \textbar\ \textbf{E-mail:} \texttt{Alexios.Theiakos@student.uva.nl}} \\[15pt] University of Amsterdam (UvA) \\ Computational Science}
+
+% \author{John Tyree\\
+% University of Amsterdam\\
+% \texttt{tyree@science.uva.nl}}
 \date{\today}
-\hypersetup{
-pdftitle={\thetitle},
-pdfauthor={John Tyree}
-}
+% \hypersetup{
+% pdftitle={\thetitle},
+% pdfauthor={John Tyree}
+% }
 
 
 \begin{document}
 \maketitle
 
-\setcounter{section}[1]
+\setcounter{section}{1}
 \section{Random Int Generator}
 
 Given that the type was restricted to \texttt{IO [Int]}, needed to make a generator which was lazy, but still able to do IO for randomness. This meant \emph{not} using \texttt{getRandomInt}, which needs to do IO for each number retrieved. Our solution was to first get a seed using \texttt{getStdGen}, and then use that to run a pure RNG. We also had to make a decision about the range of the random numbers. We arbitrarily chose [0,5].
@@ -123,12 +136,13 @@ With test functions for two and three argument properties being similar.
 
 It was interesting to see a different approach here to formula generation. Last week, we generated the formulas using QuickCheck. Our results were largely the same.
 
-One thing that was resolved from last week to this week, was our understanding of the semantics of conjunctions and disjunctions. Specifically, in the empty case. Our random generation and testing last week was based on the assumption that empty disjunctions and conjunctions were invalid, so we excluded them altogether. Now that we have established their role and why they are sensible to have, we had to make some changes to the way formulas were simplified. We now pass our tests from last week again, even with empty disjunctions and conjunctions.
+One thing that was resolved from last week to this week was our understanding of the semantics of conjunctions and disjunctions, specifically, in the empty case. Our random generation and testing last week was based on the assumption that empty disjunctions and conjunctions were invalid, so we excluded them altogether. Now that we have established their role and why they are sensible to have, we had to make some changes to the way formulas were simplified. The function now passes our tests from last week again, even with empty disjunctions and conjunctions.
 
-To summarize, we tested two properties of our formula converter: logical equivalence of the input and output formula, and whether or not the result is in valid conjunctive normal form.
+To summarize, we tested two properties of our formula converter: logical equivalence of the input and output formula and whether or not the result is in valid conjunctive normal form.
 
 \begin{code}
 fullcnf = cnf . nnf . arrowfree
+
 -- | Formulas in CNF should be equivalent to their original form.
 prop_equiv form = let cnfform = fullcnf form
                   in equiv form cnfform
@@ -141,16 +155,16 @@ Testing these was done in a similar way to the \texttt{isPermutation} tests, exc
 \begin{code}
 runCnfTests2 complexity n  = do
     forms <- getRandomForms complexity n
-    % return $ filter (not . fst) [(prop form, form) | form <- forms, prop <- properties]
+    return (filter (not . fst) [(prop form, form) | form <- forms, prop <- properties])
 \end{code}
 
 \section{Random FOL Formulas}
 
 This was essentially the same as the propositional logic generator, with some small extensions to include the new operators and \texttt{Term} data type. The code is long so I will leave it out. It is in \texttt{FormulaFuncs.hs}.
 
-\sectoin{Parsing FOL Formulas}
+\section{Parsing FOL Formulas}
 
-Unfortunately, we were unable to finish this entirely. Due to our small group size, inexperience with formal parsing of any kind, and some unfortunately-timed illness. We were only able to complete the lexer. It works much the same was as the example lexer for \texttt{Forms}, with the addition of tokens for a few new symbols. Our unfinished parser code is present in the file, but commented out.
+Unfortunately, we were unable to finish this entirely. Due to our small group size, inexperience with formal parsing of any kind, and some unfortunately-timed illness, we were only able to complete the lexer. It works much the same was as the example lexer for \texttt{Forms}, with the addition of tokens for a few new symbols. Our unfinished parser code is present in the file, but commented out.
 
 Since the parser isn't complete, we obviously cannot test it yet. We did test the lexer by manual inspection of results for a small number of test cases and from that, we hesitantly conclude that it works correctly.
 
