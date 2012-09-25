@@ -4,7 +4,6 @@ module Week2
 where
 
 import Data.Set (toAscList, singleton, unions)
-import Data.Char
 import Data.Typeable
 
 data Coin = C Int
@@ -15,33 +14,33 @@ w (C n) | n == lighter = 1 - 0.01
         | otherwise    = 1
 
 weight :: [Coin] -> Float
-weight = sum . (map w)
+weight = sum . map w
 
 balance :: [Coin] -> [Coin] -> Ordering
-balance xs ys =
-  if weight xs < weight ys then LT
-  else if weight xs > weight ys then GT
-  else EQ
+balance xs ys | weight xs < weight ys = LT
+              | weight xs > weight ys = GT
+              | otherwise = EQ
 
 --outcome :: Num a => (a -> Bool) -> (a, Bool -> a) -> a
 outcome :: (Float -> Bool) -> (Float, Bool -> Float) -> Float
 outcome accept (x, decide) =
-  if accept x then x + (decide True)
-              else (1 - x) + (decide False)
+  if accept x then x + decide True
+              else 1 - x + decide False
 
 jill :: Float -> Bool
-jill = \ x -> x > 1/2
+jill x = x > 1/2
 
 joe :: (Float, Bool -> Float)
-joe = (2/3, \p -> if p then 1/100000 else 1/2)
+joe = (2/3, \p' -> if p' then 1/100000 else 1/2)
 
 run :: Integer -> [Integer]
 run n | n < 1 = error "argument not positive"
       | n == 1 = [1]
       | even n = n: run (div n 2)
       | odd n  = n: run (3*n+1)
+      | otherwise = undefined
 
-type Name = Integer
+type Name = Int
 
 data Form = Prop Name
           | Neg  Form
@@ -56,10 +55,10 @@ instance Show Form where
   show (Neg f)    = '-' : show f
   show (Cnj fs)     = "*(" ++ showLst fs ++ ")"
   show (Dsj fs)     = "+(" ++ showLst fs ++ ")"
-  show (Impl f1 f2)  = "((" ++ show f1 ++ ") ==> ("
-                           ++ show f2 ++ "))"
-  show (Equiv f1 f2)  = "((" ++ show f1 ++ ") <=> ("
-                           ++ show f2 ++ "))"
+  show (Impl f1 f2)  = "(" ++ show f1 ++ " ==> "
+                           ++ show f2 ++ ")"
+  show (Equiv f1 f2)  = "(" ++ show f1 ++ " <=> "
+                           ++ show f2 ++ ")"
 
 showLst,showRest :: [Form] -> String
 showLst [] = ""
@@ -67,10 +66,12 @@ showLst (f:fs) = show f ++ showRest fs
 showRest [] = ""
 showRest (f:fs) = ' ': show f ++ showRest fs
 
+p,q,r :: Form
 p = Prop 1
 q = Prop 2
 r = Prop 3
 
+form1,form2,form3 :: Form
 form1 = Equiv (Impl p q) (Impl (Neg q) (Neg p))
 form2 = Equiv (Impl p q) (Impl (Neg p) (Neg q))
 form3 = Impl (Cnj [Impl p q, Impl q r]) (Impl p r)
@@ -134,6 +135,7 @@ nnf (Cnj fs) = Cnj (map nnf fs)
 nnf (Dsj fs) = Dsj (map nnf fs)
 nnf (Neg (Cnj fs)) = Dsj (map (nnf.Neg) fs)
 nnf (Neg (Dsj fs)) = Cnj (map (nnf.Neg) fs)
+nnf _ = error "Formula not in ArrowFree format."
 
 lighter, heavier :: Int
 lighter = 3
