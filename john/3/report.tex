@@ -1,0 +1,161 @@
+%        File: report.tex
+
+\documentclass[a4paper,10pt]{article}
+\usepackage{fullpage}
+\usepackage{amsmath}
+\usepackage{times}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{subfig}
+\usepackage{wrapfig}
+\usepackage{gensymb}
+\usepackage{array}
+\usepackage{titling}
+
+\usepackage{listings}
+\lstloadlanguages{Haskell}
+\lstnewenvironment{code}
+    {\lstset{}%
+      \csname lst@SetFirstLabel\endcsname}
+    {\csname lst@SaveFirstLabel\endcsname}
+    \lstset{
+      basicstyle=\small\ttfamily,
+      flexiblecolumns=false,
+      % numberstyle=\tiny,
+      % numbersep=5pt,
+      % numbers=left,
+      % firstnumber=last,
+      % stepnumber=2,
+      basewidth={0.5em,0.45em},
+      literate={+}{{$+$}}1 {/}{{$/$}}1 {*}{{$*$}}1 {=}{{$=$}}1
+               {>}{{$>$}}1 {<}{{$<$}}1 {\\}{{$\lambda$}}1
+               {\\\\}{{\char`\\\char`\\}}1
+               {->}{{$\rightarrow$}}2 {>=}{{$\geq$}}2 {<-}{{$\leftarrow$}}2
+               {<=}{{$\leq$}}2 {=>}{{$\Rightarrow$}}2
+               {\ .}{{$\circ$}}2 {\ .\ }{{$\circ$}}2
+               {>>}{{>>}}2 {>>=}{{>>=}}2
+               {|}{{$\mid$}}1
+    }
+
+\newcommand{\TODO}{{\huge\emph{\color{red}!}}}
+
+% Hyperref must be last
+\usepackage[backref,colorlinks,linkcolor=blue]{hyperref}
+\usepackage[all]{hypcap}  % Fix links to figures
+
+\title{Software Testing: Week 3}
+\author{John Tyree\\
+University of Amsterdam\\
+\texttt{tyree@science.uva.nl}}
+\date{\today}
+\hypersetup{
+pdftitle={\thetitle},
+pdfauthor={John Tyree}
+}
+
+
+\begin{document}
+\maketitle
+
+\setcounter{section}[1]
+\section{Random Int Generator}
+
+Given that the type was restricted to \texttt{IO [Int]}, needed to make a generator which was lazy, but still able to do IO for randomness. This meant \emph{not} using \texttt{getRandomInt}, which needs to do IO for each number retrieved. Our solution was to first get a seed using \texttt{getStdGen}, and then use that to run a pure RNG. We also had to make a decision about the range of the random numbers. We arbitrarily chose [0,5].
+
+\begin{code}
+genIntList :: IO [Int]
+genIntList = liftM (randomRs (0, 5)) getStdGen
+\end{code}
+
+
+\section{Permutation}
+
+As the type restricted to using only equality testing and no ordering, we reused the \texttt{removeFst} function. The test checks to see if an item from list 1 is in list 2, if so, it discards the item from both and continues. If both lists reach the empty state in the same round, then it's true, otherwise it's false.
+
+\begin{code}
+isPermutation :: Eq a => [a] -> [a] -> Bool
+isPermutation [] [] = True
+isPermutation [] _  = False
+isPermutation (x:xs) y
+    | x `elem` y = isPermutation xs (removeFst x y)
+    | otherwise  = False
+\end{code}
+
+\section{Properties}
+We chose three algebraic properties to test: Identity, transitivity, and commutativity. This was slightly challenging though, because most randomly generated lists will \emph{not} be permutations of one another. Thus, we chose to run a large number of tests on relatively small lists of small numbers to try to minimize the number of discarded test cases.
+\begin{code}
+prop_identity :: Eq a => [a] -> Bool
+prop_identity l = isPermutation l l
+
+prop_transitivity :: Eq a => [a] -> [a] -> [a] -> Bool
+prop_transitivity l m n = not (isPermutation l m && isPermutation l n) || isPermutation m n
+
+prop_commutatitivity :: Eq a => [a] -> [a] -> Bool
+prop_commutatitivity l r' = forward && backward || not forward && not backward
+    where forward  = isPermutation l r'
+          backward = isPermutation r' l
+\end{code}
+To test, we peeled off short sequences from \texttt{genIntList} and simply ran the property functions on them in all combinations of arguments.
+
+\begin{code}
+test1 :: ([Int] -> Bool) -> IO Bool
+test1 prop = liftM (all prop) $ testLists 10000
+
+testLists :: Int -> IO [[Int]]
+testLists n = do
+    g <- getStdGen
+    let (g0, g1) = split g
+    let lengths = take n (makeRandoms g0 :: [Int])
+    let lists = fst . splitAts lengths $ (makeRandoms g1 :: [Int])
+    return lists
+
+splitAts :: [Int] -> [a] -> ([[a]], [a])
+splitAts = go []
+  where
+    go acc []         l = (reverse acc, l)
+    go acc (len:lens) l = let (sublist, rest) = splitAt len l
+                          in go (sublist : acc) lens rest
+\end{code}
+With test functions for two and three argument properties being similar.
+
+\section{Random Propositional Formulas}
+
+It was interesting to see a different approach here to formula generation. Last week, we generated the formulas using QuickCheck. Our results were largely the same.
+
+One thing that was resolved from last week to this week, was our understanding of the semantics of conjunctions and disjunctions. Specifically, in the empty case. Our random generation and testing last week was based on the assumption that empty disjunctions and conjunctions were invalid, so we excluded them altogether. Now that we have established their role and why they are sensible to have, we had to make some changes to the way formulas were simplified. We now pass our tests from last week again, even with empty disjunctions and conjunctions.
+
+To summarize, we tested two properties of our formula converter: logical equivalence of the input and output formula, and whether or not the result is in valid conjunctive normal form.
+
+\begin{code}
+fullcnf = cnf . nnf . arrowfree
+-- | Formulas in CNF should be equivalent to their original form.
+prop_equiv form = let cnfform = fullcnf form
+                  in equiv form cnfform
+
+-- | Formulas should always be in valid CNF after converting.
+prop_valid = isCnf . fullcnf
+\end{code}
+
+Testing these was done in a similar way to the \texttt{isPermutation} tests, except that a list of formulas that failed at least one test is returned for inspection. An empty list indicates that all tests passed. In our tests of tens of thousands of random formulas of varying complexity, all passed.
+\begin{code}
+runCnfTests2 complexity n  = do
+    forms <- getRandomForms complexity n
+    % return $ filter (not . fst) [(prop form, form) | form <- forms, prop <- properties]
+\end{code}
+
+\section{Random FOL Formulas}
+
+This was essentially the same as the propositional logic generator, with some small extensions to include the new operators and \texttt{Term} data type. The code is long so I will leave it out. It is in \texttt{FormulaFuncs.hs}.
+
+\sectoin{Parsing FOL Formulas}
+
+Unfortunately, we were unable to finish this entirely. Due to our small group size, inexperience with formal parsing of any kind, and some unfortunately-timed illness. We were only able to complete the lexer. It works much the same was as the example lexer for \texttt{Forms}, with the addition of tokens for a few new symbols. Our unfinished parser code is present in the file, but commented out.
+
+Since the parser isn't complete, we obviously cannot test it yet. We did test the lexer by manual inspection of results for a small number of test cases and from that, we hesitantly conclude that it works correctly.
+
+% \bibliographystyle{unsrt}  % Order by citation
+% \bibliography{report}
+\end{document}
+
+
