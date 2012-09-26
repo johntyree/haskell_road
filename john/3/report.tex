@@ -71,6 +71,19 @@ John Tyree\footnote{\textbf{Student no.:} 6423035 \textbar\ \textbf{E-mail:} \te
 \begin{document}
 \maketitle
 
+\texttt{CNFTests.hs} is the ``top-level'' file. It contains the random list generation code and imports \texttt{FormulaFuncs},which contains the First Order Logic parser, and the other modules necessary.
+
+\begin{code}
+# ghci CNFTests.hs
+*CNFTests> runPermutationTests
+True        (All passed)
+*CNFTests> runCnfTests 100  -- complexity numTestCases (QuickCheck)
++++ OK, passed 100 tests.
++++ OK, passed 100 tests.
+*CNFTests> runCnfTests2 3 100 -- complexity numTestCases
+[]          (Empty list of failures - all pass)
+\end{code}
+
 \setcounter{section}{1}
 \section{Random Int Generator}
 

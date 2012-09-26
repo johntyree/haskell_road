@@ -56,10 +56,10 @@ getRandomFormula d =
                5 -> do f0 <- getRandomFormula (d-1)
                        f1 <- getRandomFormula (d-1)
                        return (Equi f0 f1)
-               6 -> do n  <- choice relations
+               6 -> do n  <- choice terms
                        f1 <- getRandomFormula (d-1)
                        return (Forall [n] f1)
-               7 -> do n  <- choice relations
+               7 -> do n  <- choice terms
                        f1 <- getRandomFormula (d-1)
                        return (Exists [n] f1)
                _  -> undefined

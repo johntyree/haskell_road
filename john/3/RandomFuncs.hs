@@ -9,12 +9,10 @@ import Control.Monad
 
 -- | Here we do the dirty work.
 genIntList :: IO [Int]
-genIntList = liftM (randomRs (0, 5)) getStdGen
+genIntList = genIntListR (0, 15)
 
-genIntList' :: IO [Int]
-genIntList' = do
-            g <- getStdGen
-            return (randomRs (0, 5) g)
+genIntListR :: Random a => (a, a) -> IO [a]
+genIntListR range = liftM (randomRs range) newStdGen
 
 
 -- | This is just a wrapper around the pure RNG code.
